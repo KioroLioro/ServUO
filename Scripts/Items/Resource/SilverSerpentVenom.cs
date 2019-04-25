@@ -2,7 +2,7 @@ using System;
 
 namespace Server.Items
 {
-    public class SilverSerpentVenom : Item
+    public class SilverSerpentVenom : Item, ICommodity
     {
         [Constructable]
         public SilverSerpentVenom()
@@ -12,7 +12,7 @@ namespace Server.Items
 
         [Constructable]
         public SilverSerpentVenom(int amount)
-            : base(0x2F5F)
+            : base(0x5722)
         {
             this.Stackable = true;
             this.Amount = amount;
@@ -22,6 +22,9 @@ namespace Server.Items
             : base(serial)
         {
         }
+
+        TextDefinition ICommodity.Description { get { return LabelNumber; } }
+        bool ICommodity.IsDeedable { get { return true; } }
 
         public override int LabelNumber
         {
@@ -42,6 +45,9 @@ namespace Server.Items
             base.Deserialize(reader);
 
             int version = reader.ReadInt();
+
+            if (ItemID != 0x5722)
+                ItemID = 0x5722;
         }
     }
 }

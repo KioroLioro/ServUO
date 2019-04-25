@@ -5,7 +5,7 @@ namespace Server.Items
 {
     public interface ICommodity /* added IsDeedable prop so expansion-based deedables can determine true/false */
     {
-        int DescriptionNumber { get; }
+        TextDefinition Description { get; }
         bool IsDeedable { get; }
     }
 
@@ -197,15 +197,20 @@ namespace Server.Items
         {
             base.GetProperties(list);
 
-            if (this.m_Commodity != null)
+            if (m_Commodity != null)
             {
                 string args;
 
-                if (this.m_Commodity.Name == null)
-                    args = String.Format("#{0}\t{1}", (this.m_Commodity is ICommodity) ? ((ICommodity)this.m_Commodity).DescriptionNumber : this.m_Commodity.LabelNumber, this.m_Commodity.Amount);
+                if (m_Commodity.Name == null)
+                {
+                    if (m_Commodity is ICommodity)
+                        args = String.Format("{0}\t{1}", ((ICommodity)m_Commodity).Description, m_Commodity.Amount);
+                    else
+                        args = String.Format("#{0}\t{1}", m_Commodity.LabelNumber, m_Commodity.Amount);
+                }
                 else
                     args = String.Format("{0}\t{1}", this.m_Commodity.Name, this.m_Commodity.Amount);
-
+                
                 list.Add(1060658, args); // ~1_val~: ~2_val~
             }
             else
@@ -218,16 +223,21 @@ namespace Server.Items
         {
             base.OnSingleClick(from);
 
-            if (this.m_Commodity != null)
+            if (m_Commodity != null)
             {
                 string args;
 
-                if (this.m_Commodity.Name == null)
-                    args = String.Format("#{0}\t{1}", (this.m_Commodity is ICommodity) ? ((ICommodity)this.m_Commodity).DescriptionNumber : this.m_Commodity.LabelNumber, this.m_Commodity.Amount);
+                if (m_Commodity.Name == null)
+                {
+                    if (m_Commodity is ICommodity)
+                        args = String.Format("{0}\t{1}", ((ICommodity)m_Commodity).Description, m_Commodity.Amount);
+                    else
+                        args = String.Format("#{0}\t{1}", m_Commodity.LabelNumber, m_Commodity.Amount);
+                }
                 else
-                    args = String.Format("{0}\t{1}", this.m_Commodity.Name, this.m_Commodity.Amount);
+                    args = String.Format("{0}\t{1}", m_Commodity.Name, m_Commodity.Amount);
 
-                this.LabelTo(from, 1060658, args); // ~1_val~: ~2_val~
+                LabelTo(from, 1060658, args); // ~1_val~: ~2_val~
             }
         }
 
@@ -237,7 +247,8 @@ namespace Server.Items
 
             BankBox box = from.FindBankNoCreate();
             CommodityDeedBox cox = CommodityDeedBox.Find(this);
-			
+            GalleonHold hold = this.RootParent as GalleonHold;
+
             // Veteran Rewards mods
             if (this.m_Commodity != null)
             {
@@ -264,6 +275,15 @@ namespace Server.Items
                     else
                         number = 1080525; // The commodity deed box must be secured before you can use it.
                 }
+                else if (hold != null)
+                {
+                    number = 1047031; // The commodity has been redeemed.
+
+                    hold.DropItem(m_Commodity);
+                    m_Commodity = null;
+
+                    Delete();
+                }
                 else
                 {
                     if (Core.ML)
@@ -280,7 +300,7 @@ namespace Server.Items
             {
                 number = 1080525; // The commodity deed box must be secured before you can use it.
             }
-            else if ((box == null || !this.IsChildOf(box)) && cox == null)
+            else if ((box == null || !this.IsChildOf(box)) && cox == null && hold == null)
             {
                 if (Core.ML)
                 {
@@ -325,10 +345,12 @@ namespace Server.Items
                 {
                     BankBox box = from.FindBankNoCreate();
                     CommodityDeedBox cox = CommodityDeedBox.Find(this.m_Deed);
+                    GalleonHold hold = ((Item)targeted).RootParent as GalleonHold;
 
                     // Veteran Rewards mods
                     if (box != null && this.m_Deed.IsChildOf(box) && ((Item)targeted).IsChildOf(box) ||
-                        cox != null && cox.IsSecure && ((Item)targeted).IsChildOf(cox))
+                        (cox != null && cox.IsSecure && ((Item)targeted).IsChildOf(cox)) ||
+                        hold != null)
                     {
                         if (this.m_Deed.SetCommodity((Item)targeted))
                         {

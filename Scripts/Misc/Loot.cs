@@ -1,9 +1,3 @@
-#region Header
-// **********
-// ServUO - Loot.cs
-// **********
-#endregion
-
 #region References
 using System;
 
@@ -33,7 +27,7 @@ namespace Server
         private static readonly Type[] m_SAArmorTypes = new[]
 		{
 			typeof(GargishLeatherChest), typeof(GargishLeatherLegs), typeof(GargishLeatherArms), typeof(GargishLeatherKilt),
-			typeof(GargishLeatherWingArmor), typeof(GargishStoneChest), typeof(GargishStoneLegs), typeof(GargishStoneArms),
+			typeof(GargishStoneChest), typeof(GargishStoneLegs), typeof(GargishStoneArms),
 			typeof(GargishStoneKilt), typeof(GargishPlateChest), typeof(GargishPlateLegs), typeof(GargishPlateArms),
 			typeof(GargishPlateKilt), typeof(GargishNecklace), typeof( GargishEarrings )
 		};
@@ -42,8 +36,7 @@ namespace Server
 
         private static readonly Type[] m_SAClothingTypes = new[]
 		{
-			typeof(GargishClothChest), typeof(GargishClothArms), typeof(GargishClothKilt), typeof(GargishClothLegs),
-			typeof(GargishClothWingArmor)
+			typeof(GargishClothChestArmor), typeof(GargishClothArmsArmor), typeof(GargishClothKiltArmor), typeof(GargishClothLegsArmor),
 		};
 
         public static Type[] SAClothingTypes { get { return m_SAClothingTypes; } }
@@ -93,7 +86,7 @@ namespace Server
         private static readonly Type[] m_AosWeaponTypes = new[]
 		{
 			typeof(Scythe), typeof(BoneHarvester), typeof(Scepter), typeof(BladedStaff), typeof(Pike), typeof(DoubleBladedStaff),
-			typeof(Lance), typeof(CrescentBlade)
+			typeof(Lance), typeof(CrescentBlade), typeof(SmithyHammer), typeof(SledgeHammerWeapon)
 		};
 
         public static Type[] AosWeaponTypes { get { return m_AosWeaponTypes; } }
@@ -156,8 +149,7 @@ namespace Server
         private static readonly Type[] m_ShieldTypes = new[]
 		{
 			typeof(BronzeShield), typeof(Buckler), typeof(HeaterShield), typeof(MetalShield), typeof(MetalKiteShield),
-			typeof(WoodenKiteShield), typeof(WoodenShield), typeof(GargishWoodenShield), typeof(GargishKiteShield),
-			typeof(LargeStoneShield), typeof(LargePlateShield)
+			typeof(WoodenKiteShield), typeof(WoodenShield)
 		};
 
         public static Type[] ShieldTypes { get { return m_ShieldTypes; } }
@@ -210,6 +202,15 @@ namespace Server
 		};
 
         public static Type[] PotionTypes { get { return m_PotionTypes; } }
+
+        private static readonly Type[] m_ImbuingEssenceIngreds = new[]
+        {
+            typeof(EssencePrecision), typeof(EssenceAchievement), typeof(EssenceBalance), typeof(EssenceControl), typeof(EssenceDiligence),
+            typeof(EssenceDirection),   typeof(EssenceFeeling), typeof(EssenceOrder),   typeof(EssencePassion),   typeof(EssencePersistence),
+            typeof(EssenceSingularity)
+        };
+
+        public static Type[] ImbuingEssenceIngreds { get { return m_ImbuingEssenceIngreds; } }
 
         private static readonly Type[] m_SEInstrumentTypes = new[] { typeof(BambooFlute) };
 
@@ -391,7 +392,7 @@ namespace Server
 		{
 			typeof(SkullCap), typeof(Bandana), typeof(FloppyHat), typeof(Cap), typeof(WideBrimHat), typeof(StrawHat),
 			typeof(TallStrawHat), typeof(WizardsHat), typeof(Bonnet), typeof(FeatheredHat), typeof(TricorneHat),
-			typeof(JesterHat)
+			typeof(JesterHat), typeof(OrcMask), typeof(TribalMask)
 		};
 
         public static Type[] HatTypes { get { return m_HatTypes; } }
@@ -409,6 +410,11 @@ namespace Server
 
         public static Type[] LibraryBookTypes { get { return m_LibraryBookTypes; } }
         #endregion
+
+        public static Item RandomEssence()
+        {
+            return Construct(m_ImbuingEssenceIngreds) as Item;
+        }
 
         #region Accessors
         public static BaseWand RandomWand()
@@ -538,7 +544,10 @@ namespace Server
 
         public static BaseJewel RandomJewelry(bool isStygian = false)
         {
-            return Construct(isStygian ? m_SAJewelryTypes : m_JewelryTypes) as BaseJewel;
+            if (isStygian)
+                return Construct(m_SAJewelryTypes, m_JewelryTypes) as BaseJewel;
+            else
+                return Construct(m_JewelryTypes) as BaseJewel;
         }
 
         public static BaseArmor RandomArmor(bool inTokuno = false, bool isMondain = false, bool isStygian = false)

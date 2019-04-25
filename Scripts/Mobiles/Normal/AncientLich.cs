@@ -7,7 +7,7 @@ namespace Server.Mobiles
     {
         [Constructable]
         public AncientLich()
-            : base(AIType.AI_Mage, FightMode.Closest, 10, 1, 0.2, 0.4)
+            : base(AIType.AI_NecroMage, FightMode.Closest, 10, 1, 0.2, 0.4)
         {
             this.Name = NameList.RandomName("ancient lich");
             this.Body = 78;
@@ -52,6 +52,8 @@ namespace Server.Mobiles
             : base(serial)
         {
         }
+
+        public override TribeType Tribe { get { return TribeType.Undead; } }
 
         public override OppositionGroup OppositionGroup
         {
